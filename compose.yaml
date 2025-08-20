@@ -1,0 +1,17 @@
+services:
+  tasks-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    init: true
+    stdin_open: true
+    tty: true
+    ports:
+      - '3000:${PORT:-3000}'
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+        - action: rebuild
+          path: package.json
