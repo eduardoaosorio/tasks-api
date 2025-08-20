@@ -35,8 +35,8 @@ describe('Tasks (e2e)', () => {
       .send({
         title: 'Test Task',
         description: 'desc',
-        assigneeId: '123e4567-e89b-12d3-a456-426614174000',
-        projectId: '123e4567-e89b-12d3-a456-426614174001',
+        assigneeId: '6f0b9a10-7e26-4e1e-825d-397f3397d827',
+        projectId: '6f0b9a10-7e26-4e1e-825d-397f3397d828',
       })
       .expect(201);
 
