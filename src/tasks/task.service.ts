@@ -1,22 +1,19 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  Inject,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { TaskEntity, TaskStatus, Priority } from './models/task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
-import type { TaskRepository } from './repository/task.repository';
 import { TaskEventsPublisher } from '../messaging/task-events.publisher';
 import { pickDefined } from '../shared/object.utils';
+import type { BaseRepository } from '../shared/base.repository';
+import type { TaskFilters } from './repository/inmemory-task.repository';
 
 @Injectable()
 export class TaskService {
   constructor(
-    @Inject('TaskRepository') private readonly repo: TaskRepository,
+    @Inject('TaskRepository')
+    private readonly repo: BaseRepository<TaskEntity, string, TaskFilters>,
     private readonly publisher: TaskEventsPublisher,
   ) {}
 
@@ -48,11 +45,6 @@ export class TaskService {
   }
 
   async create(dto: CreateTaskDto): Promise<TaskEntity> {
-    // TODO make part of DTO validation logic
-    if (dto.dueDate && new Date(dto.dueDate).getTime() <= Date.now()) {
-      throw new BadRequestException('dueDate must be in the future');
-    }
-
     const now = new Date().toISOString();
     const entity: TaskEntity = {
       id: randomUUID(),
@@ -78,11 +70,6 @@ export class TaskService {
   }
 
   async update(id: string, dto: UpdateTaskDto): Promise<TaskEntity> {
-    // TODO make part of DTO validation logic
-    if (dto.dueDate && new Date(dto.dueDate).getTime() <= Date.now()) {
-      throw new BadRequestException('dueDate must be in the future');
-    }
-
     const existing = await this.repo.findById(id);
     if (!existing) throw new NotFoundException('Task not found');
     const updatedAt = new Date().toISOString();

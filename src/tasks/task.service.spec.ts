@@ -20,8 +20,7 @@ describe('TaskService', () => {
     const module = await Test.createTestingModule({
       providers: [
         TaskService,
-        InMemoryTaskRepository,
-        { provide: 'TaskRepository', useExisting: InMemoryTaskRepository },
+        { provide: 'TaskRepository', useClass: InMemoryTaskRepository },
         { provide: TaskEventsPublisher, useClass: PublisherStub },
       ],
     }).compile();

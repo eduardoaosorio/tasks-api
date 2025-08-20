@@ -1,22 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { TaskEntity, TaskStatus } from '../models/task.entity';
-import { TaskRepository } from './task.repository';
+
+import { BaseFilters, BaseRepository } from 'src/shared/base.repository';
+
+export interface TaskFilters extends BaseFilters {
+  status?: TaskStatus;
+  assigneeId?: string;
+}
 
 @Injectable()
-export class InMemoryTaskRepository implements TaskRepository {
+export class InMemoryTaskRepository
+  implements BaseRepository<TaskEntity, string, TaskFilters>
+{
   private readonly store = new Map<string, TaskEntity>();
 
   findById(id: string): Promise<TaskEntity | null> {
     return Promise.resolve(this.store.get(id) ?? null);
   }
 
-  findAll(params: {
-    page: number;
-    limit: number;
-    status?: TaskStatus;
-    assigneeId?: string;
-  }): Promise<{ data: TaskEntity[]; total: number }> {
-    const { page, limit, status, assigneeId } = params;
+  findAll({ page, limit, status, assigneeId }: TaskFilters) {
     const all = Array.from(this.store.values());
     const filtered = all.filter((t) => {
       if (status && t.status !== status) return false;

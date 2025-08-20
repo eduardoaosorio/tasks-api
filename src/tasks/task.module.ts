@@ -8,9 +8,8 @@ import { TaskEventsPublisher } from '../messaging/task-events.publisher';
   controllers: [TaskController],
   providers: [
     TaskService,
-    InMemoryTaskRepository,
     TaskEventsPublisher,
-    { provide: 'TaskRepository', useExisting: InMemoryTaskRepository },
+    { provide: 'TaskRepository', useClass: InMemoryTaskRepository },
   ],
 })
 export class TaskModule {}
