@@ -1,3 +1,5 @@
+import { Exclude } from 'class-transformer';
+
 export enum TaskStatus {
   PENDING = 'pending',
   IN_PROGRESS = 'in_progress',
@@ -12,7 +14,7 @@ export enum Priority {
   CRITICAL = 'critical',
 }
 
-export interface TaskEntity {
+export class TaskEntity {
   id: string;
   title: string;
   description: string;
@@ -24,17 +26,12 @@ export interface TaskEntity {
   updatedAt: string; // ISO 8601
   dueDate?: string; // ISO 8601
   tags: string[];
-  metadata: Record<string, unknown>;
-}
 
-export interface PaginatedResult<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNext: boolean;
-    hasPrev: boolean;
-  };
+  // excluding metadata just to showcase global ClassSerializerInterceptor functionality
+  @Exclude()
+  metadata: Record<string, unknown>;
+
+  constructor(partial: Partial<TaskEntity>) {
+    Object.assign(this, partial);
+  }
 }

@@ -6,10 +6,6 @@ import { TaskEventsPublisher } from '../messaging/task-events.publisher';
 
 @Module({
   controllers: [TaskController],
-  providers: [
-    TaskService,
-    TaskEventsPublisher,
-    { provide: 'TaskRepository', useClass: InMemoryTaskRepository },
-  ],
+  providers: [TaskService, TaskEventsPublisher, InMemoryTaskRepository],
 })
 export class TaskModule {}

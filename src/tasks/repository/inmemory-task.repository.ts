@@ -31,7 +31,8 @@ export class InMemoryTaskRepository
     return Promise.resolve({ data, total });
   }
 
-  create(task: TaskEntity): Promise<TaskEntity> {
+  create(payload: TaskEntity): Promise<TaskEntity> {
+    const task = new TaskEntity(payload);
     this.store.set(task.id, task);
     return Promise.resolve(task);
   }
@@ -39,7 +40,7 @@ export class InMemoryTaskRepository
   update(id: string, updates: Partial<TaskEntity>): Promise<TaskEntity | null> {
     const existing = this.store.get(id);
     if (!existing) return Promise.resolve(null);
-    const updated: TaskEntity = { ...existing, ...updates };
+    const updated = new TaskEntity({ ...existing, ...updates });
     this.store.set(id, updated);
     return Promise.resolve(updated);
   }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { TaskEntity, TaskStatus, Priority } from './models/task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -6,18 +6,17 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { QueryTasksDto } from './dto/query-tasks.dto';
 import { TaskEventsPublisher } from '../messaging/task-events.publisher';
 import { pickDefined } from '../shared/object.utils';
-import type { BaseRepository } from '../shared/base.repository';
-import type { TaskFilters } from './repository/inmemory-task.repository';
+import { InMemoryTaskRepository } from './repository/inmemory-task.repository';
+import { PaginatedResult } from 'src/shared/types';
 
 @Injectable()
 export class TaskService {
   constructor(
-    @Inject('TaskRepository')
-    private readonly repo: BaseRepository<TaskEntity, string, TaskFilters>,
+    private readonly repo: InMemoryTaskRepository,
     private readonly publisher: TaskEventsPublisher,
   ) {}
 
-  async list(dto: QueryTasksDto) {
+  async list(dto: QueryTasksDto): Promise<PaginatedResult<TaskEntity>> {
     const { data, total } = await this.repo.findAll({
       page: dto.page,
       limit: dto.limit,
@@ -46,7 +45,7 @@ export class TaskService {
 
   async create(dto: CreateTaskDto): Promise<TaskEntity> {
     const now = new Date().toISOString();
-    const entity: TaskEntity = {
+    const created = await this.repo.create({
       id: randomUUID(),
       title: dto.title,
       description: dto.description ?? '',
@@ -59,9 +58,7 @@ export class TaskService {
       dueDate: dto.dueDate,
       tags: dto.tags ?? [],
       metadata: dto.metadata ?? {},
-    } as TaskEntity;
-
-    const created = await this.repo.create(entity);
+    });
     this.publisher.publishTaskCreated({
       type: 'task.created',
       task: created,
