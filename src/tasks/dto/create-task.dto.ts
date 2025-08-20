@@ -37,7 +37,7 @@ export class CreateTaskDto {
 
   @ValidateIf((o: Partial<CreateTaskDto>) => o.dueDate !== undefined)
   @IsISO8601()
-  dueDate?: string; // must be future date; validated in service for now
+  dueDate?: string;
 
   @IsArray()
   @ArrayMaxSize(10)
